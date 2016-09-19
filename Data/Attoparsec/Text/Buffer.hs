@@ -1,5 +1,9 @@
 {-# LANGUAGE BangPatterns, CPP, MagicHash, RankNTypes, RecordWildCards,
     UnboxedTuples #-}
+#ifdef __GHCJS__
+{-# LANGUAGE ForeignFunctionInterface, UnliftedFFITypes, JavaScriptFFI,
+    GHCForeignImportPrim #-}
+#endif
 
 -- |
 -- Module      :  Data.Attoparsec.Text.Buffer
@@ -52,6 +56,10 @@ import GHC.Exts (Int(..), indexIntArray#, unsafeCoerce#, writeIntArray#)
 import GHC.ST (ST(..), runST)
 import Prelude hiding (length)
 import qualified Data.Text.Array as A
+#ifdef __GHCJS__
+import Data.JSString (JSString)
+import GHC.Exts (ByteArray#, Int#)
+#endif
 
 -- If _cap is zero, this buffer is empty.
 data Buffer = Buf {
@@ -69,15 +77,33 @@ instance Show Buffer where
 -- copies in the (hopefully) common case of no further input being fed
 -- to us.
 buffer :: Text -> Buffer
+#ifndef __GHCJS__
 buffer (Text arr off len) = Buf arr off len len 0
+#else
+buffer (Text txt) =
+  let (# ba, len' #) = js_textFromJSString txt
+      len = I# len'
+      off = 0
+  in Buf (A.Array ba) off len len 0
+#endif
 
 unbuffer :: Buffer -> Text
+#ifndef __GHCJS__
 unbuffer (Buf arr off len _ _) = Text arr off len
+#else
+unbuffer (Buf (A.Array ba) (I# off) (I# len) _ _) = Text (js_textToJSString ba off len)
+#endif
 
 unbufferAt :: Int -> Buffer -> Text
+#ifndef __GHCJS__
 unbufferAt s (Buf arr off len _ _) =
   assert (s >= 0 && s <= len) $
   Text arr (off+s) (len-s)
+#else
+unbufferAt s (Buf (A.Array ba) (I# off) (I# len) _ _) =
+  assert (s >= 0 && s <= (I# len)) $
+  Text $ js_substr1 ((I# off)+s) (js_textToJSString ba off len)
+#endif
 
 instance Semigroup Buffer where
     (Buf _ _ _ 0 _) <> b                     = b
@@ -96,7 +122,15 @@ instance Monoid Buffer where
 
 pappend :: Buffer -> Text -> Buffer
 pappend (Buf _ _ _ 0 _) t      = buffer t
+#ifndef __GHCJS__
 pappend buf (Text arr off len) = append buf arr off len
+#else
+pappend buf (Text txt) =
+  let (# ba, len' #) = js_textFromJSString txt
+      len = I# len'
+      off = 0
+  in append buf (A.Array ba) off len
+#endif
 
 append :: Buffer -> A.Array -> Int -> Int -> Buffer
 append (Buf arr0 off0 len0 cap0 gen0) !arr1 !off1 !len1 = runST $ do
@@ -126,16 +160,29 @@ length (Buf _ _ len _ _) = len
 {-# INLINE length #-}
 
 substring :: Int -> Int -> Buffer -> Text
+#ifndef __GHCJS__
 substring s l (Buf arr off len _ _) =
   assert (s >= 0 && s <= len) .
   assert (l >= 0 && l <= len-s) $
   Text arr (off+s) l
+#else
+substring s l (Buf (A.Array ba) (I# off) (I# len) _ _) =
+  assert (s >= 0 && s <= (I# len)) .
+  assert (l >= 0 && l <= (I# len)-s) $
+  Text $ js_substr ((I# off)+s) l (js_textToJSString ba off len)
+#endif
 {-# INLINE substring #-}
 
 dropWord16 :: Int -> Buffer -> Text
+#ifndef __GHCJS__
 dropWord16 s (Buf arr off len _ _) =
   assert (s >= 0 && s <= len) $
   Text arr (off+s) (len-s)
+#else
+dropWord16 s (Buf (A.Array ba) (I# off) (I# len) _ _) =
+  assert (s >= 0 && s <= (I# len)) $
+  Text $ js_substr1 ((I# off)+s) (js_textToJSString ba off len)
+#endif
 {-# INLINE dropWord16 #-}
 
 -- | /O(1)/ Iterate (unsafely) one step forwards through a UTF-16
@@ -170,3 +217,16 @@ writeGen :: A.MArray s -> Int -> ST s ()
 writeGen a (I# gen#) = ST $ \s0# ->
   case writeIntArray# (A.maBA a) 0# gen# s0# of
     s1# -> (# s1#, () #)
+
+#ifdef __GHCJS__
+foreign import javascript unsafe
+  "h$textFromString"
+  js_textFromJSString :: JSString -> (# ByteArray#, Int# #)
+foreign import javascript unsafe
+  "h$textToString"
+  js_textToJSString :: ByteArray# -> Int# -> Int# -> JSString
+foreign import javascript unsafe
+  "$3.substr($1,$2)" js_substr :: Int -> Int -> JSString -> JSString
+foreign import javascript unsafe
+  "$2.substr($1)" js_substr1 :: Int -> JSString -> JSString
+#endif

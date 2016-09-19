@@ -546,4 +546,8 @@ lengthOf :: Buffer -> Pos
 lengthOf = Pos . Buf.length
 
 size :: Text -> Pos
+#ifndef __GHCJS__
 size (Text _ _ l) = Pos l
+#else
+size t = Pos $ T.length t
+#endif
