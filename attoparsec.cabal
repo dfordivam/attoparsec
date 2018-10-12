@@ -125,6 +125,9 @@ test-suite tests
   if flag(developer)
     ghc-options: -Werror
 
+  if impl(ghcjs)
+    build-depends:
+      ghcjs-base
   build-depends:
     array,
     base >= 4 && < 5,
