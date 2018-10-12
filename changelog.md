@@ -1,3 +1,18 @@
+0.13.2.1
+
+* Improved performance of `Data.Attoparsec.Text.asciiCI`
+
+0.13.2.0
+
+* `pure` is now strict in `Position`
+
+0.13.1.0
+
+* `runScanner` now correctly returns the final state
+  (https://github.com/bos/attoparsec/issues/105).
+* `Parser`, `ZeptoT`, `Buffer`, and `More` now expose `Semigroup` instances.
+* `Parser`, and `ZeptoT` now expose `MonadFail` instances.
+
 0.13.0.2
 
 * Restore the fast specialised character set implementation for Text
