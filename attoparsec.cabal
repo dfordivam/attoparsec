@@ -1,12 +1,12 @@
 name:            attoparsec
-version:         0.13.0.2
+version:         0.13.2.2
 license:         BSD3
 license-file:    LICENSE
 category:        Text, Parsing
 author:          Bryan O'Sullivan <bos@serpentine.com>
-maintainer:      Bryan O'Sullivan <bos@serpentine.com>
+maintainer:      Bryan O'Sullivan <bos@serpentine.com>, Ben Gamari <ben@smart-cactus.org>
 stability:       experimental
-tested-with:     GHC == 7.0.1, GHC == 7.2.1, GHC == 7.4.2, GHC ==7.6.3, GHC ==7.8.4, GHC ==7.10.3
+tested-with:     GHC == 7.0.4, GHC == 7.2.2, GHC == 7.4.2, GHC ==7.6.3, GHC ==7.8.4, GHC ==7.10.3, GHC ==8.0.2, GHC ==8.2.2
 synopsis:        Fast combinator parsing for bytestrings and text
 cabal-version:   >= 1.8
 homepage:        https://github.com/bos/attoparsec
@@ -101,6 +101,24 @@ test-suite tests
                   QC.Text.FastSet
                   QC.Text.Regressions
 
+  other-modules:  Data.Attoparsec.ByteString
+                  Data.Attoparsec.ByteString.Buffer
+                  Data.Attoparsec.ByteString.Char8
+                  Data.Attoparsec.ByteString.FastSet
+                  Data.Attoparsec.ByteString.Internal
+                  Data.Attoparsec.ByteString.Lazy
+                  Data.Attoparsec.Combinator
+                  Data.Attoparsec.Internal
+                  Data.Attoparsec.Internal.Fhthagn
+                  Data.Attoparsec.Internal.Types
+                  Data.Attoparsec.Number
+                  Data.Attoparsec.Text
+                  Data.Attoparsec.Text.Buffer
+                  Data.Attoparsec.Text.FastSet
+                  Data.Attoparsec.Text.Internal
+                  Data.Attoparsec.Text.Lazy
+                  Data.Attoparsec.Zepto
+
   ghc-options:
     -Wall -threaded -rtsopts
 
@@ -112,7 +130,7 @@ test-suite tests
     base >= 4 && < 5,
     bytestring,
     deepseq >= 1.1,
-    QuickCheck >= 2.7,
+    QuickCheck >= 2.7 && < 2.10,
     quickcheck-unicode,
     scientific,
     tasty >= 0.11,
