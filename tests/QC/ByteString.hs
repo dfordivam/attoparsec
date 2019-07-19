@@ -8,9 +8,7 @@ import Data.Char (chr, ord, toUpper)
 import Data.Int (Int64)
 import Data.Word (Word8)
 import Prelude hiding (take, takeWhile)
-import QC.Common (ASCII(..), liftOp, parseBS, toStrictBS)
-import Test.Tasty (TestTree)
-import Test.Tasty.QuickCheck (testProperty)
+import QC.Common (ASCII(..), liftOp, parseBS, toStrictBS, testProperty)
 import Test.QuickCheck
 import qualified Data.Attoparsec.ByteString as P
 import qualified Data.Attoparsec.ByteString.Char8 as P8
@@ -28,7 +26,7 @@ satisfy w s = parseBS (P.satisfy (<=w)) (L.cons w s) === Just w
 
 satisfyWith :: Char -> L.ByteString -> Property
 satisfyWith c s = parseBS (P.satisfyWith (chr . fromIntegral) (<=c))
-                         (L.cons (fromIntegral (ord c)) s) === Just c
+                         (L.cons (fromIntegral (ord c)) s) === Just (chr $ mod (ord c) 256)
 
 word8 :: Word8 -> L.ByteString -> Property
 word8 w s = parseBS (P.word8 w) (L.cons w s) === Just w
@@ -155,31 +153,31 @@ nonmembers :: [Word8] -> [Word8] -> Property
 nonmembers s s' = property . not . any (`S.memberWord8` set) $ filter (not . (`elem` s)) s'
     where set = S.fromList s
 
-tests :: [TestTree]
-tests = [
-      testProperty "anyWord8" anyWord8
-    , testProperty "endOfInput" endOfInput
-    , testProperty "endOfLine" endOfLine
-    , testProperty "notWord8" notWord8
-    , testProperty "peekWord8" peekWord8
-    , testProperty "peekWord8'" peekWord8'
-    , testProperty "satisfy" satisfy
-    , testProperty "satisfyWith" satisfyWith
-    , testProperty "scan" scan
-    , testProperty "skip" skip
-    , testProperty "skipWhile" skipWhile
-    , testProperty "string" string
-    , testProperty "stringCI" stringCI
-    , testProperty "strings" strings
-    , testProperty "take" take
-    , testProperty "takeByteString" takeByteString
-    , testProperty "takeCount" takeCount
-    , testProperty "takeLazyByteString" takeLazyByteString
-    , testProperty "takeTill" takeTill
-    , testProperty "takeWhile" takeWhile
-    , testProperty "takeWhile1" takeWhile1
-    , testProperty "takeWhile1_empty" takeWhile1_empty
-    , testProperty "word8" word8
-    , testProperty "members" members
-    , testProperty "nonmembers" nonmembers
-  ]
+tests :: IO ()
+tests = do
+  testProperty "anyWord8" anyWord8
+  testProperty "endOfInput" endOfInput
+  testProperty "endOfLine" endOfLine
+  testProperty "notWord8" notWord8
+  testProperty "peekWord8" peekWord8
+  testProperty "peekWord8'" peekWord8'
+  testProperty "satisfy" satisfy
+  testProperty "satisfyWith" satisfyWith
+  testProperty "scan" scan
+  testProperty "skip" skip
+  testProperty "skipWhile" skipWhile
+  testProperty "string" string
+  testProperty "stringCI" stringCI
+  testProperty "strings" strings
+  testProperty "take" take
+  testProperty "takeByteString" takeByteString
+  testProperty "takeCount" takeCount
+  testProperty "takeLazyByteString" takeLazyByteString
+  testProperty "takeTill" takeTill
+  testProperty "takeWhile" takeWhile
+  testProperty "takeWhile1" takeWhile1
+  testProperty "takeWhile1_empty" takeWhile1_empty
+  testProperty "word8" word8
+  testProperty "members" members
+  testProperty "nonmembers" nonmembers
+

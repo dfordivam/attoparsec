@@ -7,11 +7,9 @@ import Control.Applicative ((<*>), (<$>))
 #endif
 import Data.Int (Int64)
 import Prelude hiding (take, takeWhile)
-import QC.Common (liftOp, parseT)
+import QC.Common (liftOp, parseT, testProperty)
 import qualified QC.Text.FastSet as FastSet
 import qualified QC.Text.Regressions as Regressions
-import Test.Tasty (TestTree, testGroup)
-import Test.Tasty.QuickCheck (testProperty)
 import Test.QuickCheck
 import qualified Data.Attoparsec.Text as P
 import qualified Data.Attoparsec.Text.Lazy as PL
@@ -162,34 +160,33 @@ nonmembers :: String -> String -> Property
 nonmembers s s' = property . not . any (`S.member` set) $ filter (not . (`elem` s)) s'
     where set = S.fromList s
 
-tests :: [TestTree]
-tests = [
-      testProperty "anyChar" anyChar
-    , testProperty "asciiCI" asciiCI
-    , testProperty "char" char
-    , testProperty "endOfInput" endOfInput
-    , testProperty "endOfLine" endOfLine
-    , testProperty "notChar" notChar
-    , testProperty "peekChar" peekChar
-    , testProperty "peekChar'" peekChar'
-    , testProperty "satisfy" satisfy
-    , testProperty "satisfyWith" satisfyWith
-    , testProperty "scan" scan
-    , testProperty "skip" skip
-    , testProperty "skipWhile" skipWhile
-    , testProperty "string" string
-    , testProperty "strings" strings
-    , testProperty "stringCI" stringCI
-    , testProperty "take" take
-    , testProperty "takeText" takeText
-    , testProperty "takeCount" takeCount
-    , testProperty "takeLazyText" takeLazyText
-    , testProperty "takeTill" takeTill
-    , testProperty "takeWhile" takeWhile
-    , testProperty "takeWhile1" takeWhile1
-    , testProperty "takeWhile1_empty" takeWhile1_empty
-    , testProperty "members" members
-    , testProperty "nonmembers" nonmembers
-    , testGroup "FastSet" FastSet.tests
-    , testGroup "Regressions" Regressions.tests
-  ]
+tests :: IO ()
+tests = do
+  testProperty "anyChar" anyChar
+  testProperty "asciiCI" asciiCI
+  testProperty "char" char
+  testProperty "endOfInput" endOfInput
+  testProperty "endOfLine" endOfLine
+  testProperty "notChar" notChar
+  testProperty "peekChar" peekChar
+  testProperty "peekChar'" peekChar'
+  testProperty "satisfy" satisfy
+  testProperty "satisfyWith" satisfyWith
+  testProperty "scan" scan
+  testProperty "skip" skip
+  testProperty "skipWhile" skipWhile
+  testProperty "string" string
+  testProperty "strings" strings
+  testProperty "stringCI" stringCI
+  testProperty "take" take
+  testProperty "takeText" takeText
+  testProperty "takeCount" takeCount
+  testProperty "takeLazyText" takeLazyText
+  testProperty "takeTill" takeTill
+  testProperty "takeWhile" takeWhile
+  testProperty "takeWhile1" takeWhile1
+  testProperty "takeWhile1_empty" takeWhile1_empty
+  testProperty "members" members
+  testProperty "nonmembers" nonmembers
+  FastSet.tests
+  Regressions.tests

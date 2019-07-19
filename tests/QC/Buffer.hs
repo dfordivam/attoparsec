@@ -7,9 +7,7 @@ module QC.Buffer (tests) where
 import Control.Applicative ((<$>))
 import Data.Monoid (Monoid(mconcat))
 #endif
-import QC.Common ()
-import Test.Tasty (TestTree)
-import Test.Tasty.QuickCheck (testProperty)
+import QC.Common (testProperty)
 import Test.QuickCheck
 import qualified Data.Attoparsec.ByteString.Buffer as BB
 import qualified Data.Attoparsec.Text.Buffer as BT
@@ -80,17 +78,16 @@ b_unsafeDrop (BP _ts t buf) = do
 t_dropWord16 :: BPT -> Gen Property
 t_dropWord16 (BP _ts t buf) = do
   i <- choose (0, T.lengthWord16 t)
-  return $ T.dropWord16 i t === BT.dropWord16 i buf
+  return $ label (show i) $ T.dropWord16 i t === BT.dropWord16 i buf
 
-tests :: [TestTree]
-tests = [
-    testProperty "b_unbuffer" b_unbuffer
-  , testProperty "t_unbuffer" t_unbuffer
-  , testProperty "b_length" b_length
-  , testProperty "t_length" t_length
-  , testProperty "b_unsafeIndex" b_unsafeIndex
-  , testProperty "t_iter" t_iter
-  , testProperty "t_iter_" t_iter_
-  , testProperty "b_unsafeDrop" b_unsafeDrop
-  , testProperty "t_dropWord16" t_dropWord16
-  ]
+tests :: IO ()
+tests = do
+  testProperty "b_unbuffer" b_unbuffer
+  testProperty "t_unbuffer" t_unbuffer
+  testProperty "b_length" b_length
+  testProperty "t_length" t_length
+  testProperty "b_unsafeIndex" b_unsafeIndex
+  testProperty "t_iter" t_iter
+  testProperty "t_iter_" t_iter_
+  testProperty "b_unsafeDrop" b_unsafeDrop
+  testProperty "t_dropWord16" t_dropWord16

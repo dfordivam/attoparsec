@@ -6,14 +6,11 @@ import qualified QC.ByteString as ByteString
 import qualified QC.Combinator as Combinator
 import qualified QC.Simple as Simple
 import qualified QC.Text as Text
-import Test.Tasty (defaultMain, testGroup)
 
-main = defaultMain tests
-
-tests = testGroup "tests" [
-    testGroup "bs" ByteString.tests
-  , testGroup "buf" Buffer.tests
-  , testGroup "combinator" Combinator.tests
-  , testGroup "simple" Simple.tests
-  , testGroup "text" Text.tests
-  ]
+main :: IO ()
+main = do
+  putStrLn "ByteString" >> ByteString.tests
+  putStrLn "Buffer" >> Buffer.tests
+  putStrLn "Combinator" >> Combinator.tests
+  putStrLn "Simple" >> Simple.tests
+  putStrLn "Text" >> Text.tests

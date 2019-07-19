@@ -1,8 +1,7 @@
 {-# LANGUAGE CPP, FlexibleInstances #-}
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 module QC.Common
-    (
-      ASCII(..)
+    ( ASCII(..)
     , parseBS
     , parseT
     , toLazyBS
@@ -13,12 +12,15 @@ module QC.Common
     , repackT
     , repackT_
     , liftOp
+    , testProperty
     ) where
 
 #if !MIN_VERSION_base(4,8,0)
 import Control.Applicative ((<*>), (<$>))
 #endif
+import Control.Exception
 import Data.Char (isAlpha)
+import Data.Typeable
 import Test.QuickCheck
 import Test.QuickCheck.Unicode (shrinkChar, string)
 import qualified Data.ByteString as B
@@ -111,3 +113,15 @@ liftOp name f x y = counterexample desc (f x y)
                      | otherwise -> " " ++ name ++ " "
                _ -> " ??? "
         desc = "not (" ++ show x ++ op ++ show y ++ ")"
+
+data FailedTest = FailedTest [String] Result
+  deriving (Show, Typeable)
+
+instance Exception FailedTest
+
+testProperty :: Testable prop => String -> prop -> IO ()
+testProperty name prop = do
+  result <- quickCheckResult $ label name prop
+  case result of
+    Success {} -> return ()
+    _ -> throwIO $ FailedTest (failingLabels result) result

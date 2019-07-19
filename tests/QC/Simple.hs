@@ -10,8 +10,7 @@ import Data.ByteString (ByteString)
 import Data.List (foldl')
 import Data.Maybe (fromMaybe)
 import QC.Rechunked (rechunkBS)
-import Test.Tasty (TestTree)
-import Test.Tasty.QuickCheck (testProperty)
+import QC.Common (testProperty)
 import Test.QuickCheck (Property, counterexample, forAll)
 import qualified Data.Attoparsec.ByteString.Char8 as A
 
@@ -31,7 +30,6 @@ parse :: A.Parser r -> [ByteString] -> A.Result r
 parse p (x:xs) = foldl' A.feed (A.parse p x) xs
 parse p []     = A.parse p ""
 
-tests :: [TestTree]
-tests = [
+tests :: IO ()
+tests = do
       testProperty "issue75" t_issue75
-  ]

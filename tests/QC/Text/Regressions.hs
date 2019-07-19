@@ -11,8 +11,7 @@ import Data.Maybe (fromMaybe)
 import Data.Char (isLower)
 import Data.Monoid ((<>))
 import QC.Rechunked (rechunkT)
-import Test.Tasty (TestTree)
-import Test.Tasty.QuickCheck (testProperty)
+import QC.Common (testProperty)
 import Test.QuickCheck (Property, counterexample, forAll)
 import qualified Data.Attoparsec.Text as A
 
@@ -48,7 +47,5 @@ parse p (x:xs) = foldl' A.feed (A.parse p x) xs
 parse p []     = A.parse p ""
 
 
-tests :: [TestTree]
-tests = [
-      testProperty "issue105" t_issue105
-  ]
+tests :: IO ()
+tests = testProperty "issue105" t_issue105
