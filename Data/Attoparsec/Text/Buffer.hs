@@ -181,7 +181,7 @@ dropWord16 s (Buf arr off len _ _) =
 #else
 dropWord16 s (Buf (A.Array ba) (I# off) (I# len) _ _) =
   assert (s >= 0 && s <= (I# len)) $
-  Text $ js_substr1 ((I# off)+s) (js_textToJSString ba off len)
+  Text $ js_substr1 s (js_textToJSString ba off len)
 #endif
 {-# INLINE dropWord16 #-}
 
